@@ -46,10 +46,10 @@ jobs:
           echo "PR #$pr: author=$author ($author_type) state=$state head=$current_sha labelled=$labelled; CI/CD ran on $HEAD_SHA"
 
           case "$author" in
-            'dependabot[bot]'|'copilot[bot]') ;;
+            'dependabot[bot]'|'copilot[bot]'|'jaxzin') ;;
             *) echo "Skip: author $author is not an auto-merge bot."; exit 0 ;;
           esac
-          if [ "$author_type" != "Bot" ]; then echo "Skip: author is not a Bot account."; exit 0; fi
+          if [ "$author_type" != "Bot" ] && [ "$author" != "jaxzin" ]; then echo "Skip: author is not a Bot account."; exit 0; fi
           if [ "$head_repo" != "$GH_REPO" ]; then echo "Skip: head branch is not in $GH_REPO."; exit 0; fi
           if [ "$state" != "open" ]; then echo "Skip: PR is $state."; exit 0; fi
           if [ "$labelled" != "true" ]; then echo "Skip: no automerge label."; exit 0; fi
