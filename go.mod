@@ -1,3 +1,4 @@
+// FORCE_CI_RED gate test d (B)
 module github.com/ubiquiti-community/terraform-provider-unifi
 
 go 1.25.9
