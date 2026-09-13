@@ -21,3 +21,4 @@ The docker, UDM, and UDM-Pro versions are slightly different (the API is proxied
 ### Terraform 1.0 and above
 
 You can use the provider via the [Terraform provider registry](https://registry.terraform.io/providers/ubiquiti-community/unifi).
+<!-- automerge gate test a -->
