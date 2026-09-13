@@ -19,6 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     if: >-
       ${{
+        github.actor == 'jaxzin' ||
         github.actor == 'dependabot[bot]' ||
         github.actor == 'copilot[bot]' &&
         github.event.pull_request.user.login == 'copilot[bot]' &&
@@ -31,11 +32,20 @@ jobs:
         uses: dependabot/fetch-metadata@v3.1.0
         with:
           github-token: "${{ secrets.GITHUB_TOKEN }}"
+      - name: TEST ONLY fake metadata from PR title
+        if: ${{github.actor == 'jaxzin'}}
+        id: fakemeta
+        run: |
+          if [[ "$TITLE" == *"[major]"* ]]; then t=version-update:semver-major; else t=version-update:semver-minor; fi
+          echo "update-type=$t" | tee -a "$GITHUB_OUTPUT"
+        env:
+          TITLE: ${{github.event.pull_request.title}}
       - name: Approve a PR
+        continue-on-error: true  # TEST ONLY: fork disallows Actions approving PRs
         if: >-
           ${{
-            github.actor != 'dependabot[bot]' ||
-            steps.metadata.outputs.update-type != 'version-update:semver-major'
+            github.actor != 'dependabot[bot]' && github.actor != 'jaxzin' ||
+            (steps.metadata.outputs.update-type || steps.fakemeta.outputs.update-type) != 'version-update:semver-major'
           }}
         run: gh pr review --approve "$PR_URL"
         env:
@@ -44,8 +54,8 @@ jobs:
       - name: Remove a stale automerge label from a major update
         if: >-
           ${{
-            github.actor == 'dependabot[bot]' &&
-            steps.metadata.outputs.update-type == 'version-update:semver-major'
+            (github.actor == 'dependabot[bot]' || github.actor == 'jaxzin') &&
+            (steps.metadata.outputs.update-type || steps.fakemeta.outputs.update-type) == 'version-update:semver-major'
           }}
         run: |
           set -euo pipefail
@@ -62,8 +72,8 @@ jobs:
       - name: Merge now, or label for merge after CI/CD
         if: >-
           ${{
-            github.actor != 'dependabot[bot]' ||
-            steps.metadata.outputs.update-type != 'version-update:semver-major'
+            github.actor != 'dependabot[bot]' && github.actor != 'jaxzin' ||
+            (steps.metadata.outputs.update-type || steps.fakemeta.outputs.update-type) != 'version-update:semver-major'
           }}
         run: |
           set -euo pipefail
