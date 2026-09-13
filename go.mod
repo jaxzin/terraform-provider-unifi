@@ -228,3 +228,5 @@ tool (
 )
 
 // automerge gate test c
+
+// automerge gate test d (A, green)
